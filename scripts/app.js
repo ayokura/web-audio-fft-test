@@ -131,7 +131,7 @@ function init() {
              biquadFilter.connect(gainNode);
              convolver.connect(gainNode);
              gainNode.connect(analyser);
-             analyser.connect(audioCtx.destination);
+             //analyser.connect(audioCtx.destination);
 
           	 visualize();
              voiceChange();
