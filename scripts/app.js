@@ -1,7 +1,7 @@
 let heading = document.querySelector('h1');
 heading.textContent = 'CLICK ANYWHERE TO START'
 document.body.addEventListener('click', init);
-
+var viewArray;
 
 function init() {
   heading.textContent = 'Voice-change-O-matic';
@@ -141,6 +141,8 @@ function init() {
      console.log('getUserMedia not supported on your browser!');
   }
 
+
+
   function visualize() {
     WIDTH = canvas.width;
     HEIGHT = canvas.height;
@@ -148,89 +150,43 @@ function init() {
 
     var visualSetting = visualSelect.value;
     console.log(visualSetting);
+    
+    // for debug
+    heading.textContent = audioCtx.sampleRate;
 
-    if(visualSetting === "sinewave") {
-      analyser.fftSize = 2048;
-      var bufferLength = analyser.fftSize;
-      console.log(bufferLength);
-      var dataArray = new Uint8Array(bufferLength);
+    analyser.fftSize = 4096;
+    var bufferLengthAlt = analyser.frequencyBinCount;
+    console.log(bufferLengthAlt);
+    bufferLengthAlt = 400;
+    console.log(bufferLengthAlt);
+    var dataArrayAlt = new Uint8Array(bufferLengthAlt);
 
-      canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
-      var draw = function() {
+    var drawAlt = function() {
+      drawVisual = requestAnimationFrame(drawAlt);
 
-        drawVisual = requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArrayAlt);
 
-        analyser.getByteTimeDomainData(dataArray);
-
-        canvasCtx.fillStyle = 'rgb(200, 200, 200)';
-        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-
-        canvasCtx.lineWidth = 2;
-        canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
-
-        canvasCtx.beginPath();
-
-        var sliceWidth = WIDTH * 1.0 / bufferLength;
-        var x = 0;
-
-        for(var i = 0; i < bufferLength; i++) {
-
-          var v = dataArray[i] / 128.0;
-          var y = v * HEIGHT/2;
-
-          if(i === 0) {
-            canvasCtx.moveTo(x, y);
-          } else {
-            canvasCtx.lineTo(x, y);
-          }
-
-          x += sliceWidth;
-        }
-
-        canvasCtx.lineTo(canvas.width, canvas.height/2);
-        canvasCtx.stroke();
-      };
-
-      draw();
-
-    } else if(visualSetting == "frequencybars") {
-      analyser.fftSize = 256;
-      var bufferLengthAlt = analyser.frequencyBinCount;
-      console.log(bufferLengthAlt);
-      var dataArrayAlt = new Uint8Array(bufferLengthAlt);
-
-      canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-
-      var drawAlt = function() {
-        drawVisual = requestAnimationFrame(drawAlt);
-
-        analyser.getByteFrequencyData(dataArrayAlt);
-
-        canvasCtx.fillStyle = 'rgb(0, 0, 0)';
-        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-
-        var barWidth = (WIDTH / bufferLengthAlt) * 2.5;
-        var barHeight;
-        var x = 0;
-
-        for(var i = 0; i < bufferLengthAlt; i++) {
-          barHeight = dataArrayAlt[i];
-
-          canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
-          canvasCtx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight/2);
-
-          x += barWidth + 1;
-        }
-      };
-
-      drawAlt();
-
-    } else if(visualSetting == "off") {
-      canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-      canvasCtx.fillStyle = "red";
+      canvasCtx.fillStyle = 'rgb(0, 0, 0)';
       canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-    }
+
+      var barWidth = (WIDTH / (bufferLengthAlt-18)) * 2.5;
+      var barHeight;
+      var x = 0;
+
+      for(var i = 17; i < bufferLengthAlt; i++) {
+        barHeight = dataArrayAlt[i];
+
+        canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
+        canvasCtx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight/2);
+
+        x += barWidth + 1;
+      }
+      viewArray = dataArrayAlt;
+    };
+
+    drawAlt();
 
   }
 
